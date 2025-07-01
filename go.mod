@@ -1,9 +1,12 @@
 module treds
 
-go 1.22
+go 1.24
+
+toolchain go1.24.3
 
 require (
 	github.com/absolutelightning/gods v1.18.3
+	github.com/asheshvidyut/prefix-search-optimized-radix v1.0.2
 	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/raft v1.7.1
@@ -25,7 +28,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/hashicorp/go-hclog v1.6.2 // indirect
-	github.com/hashicorp/go-immutable-radix v1.3.0 // indirect
+	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
 	github.com/hashicorp/go-msgpack/v2 v2.1.2 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect

@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/absolutelightning/gods/maps/treemap"
+	"github.com/asheshvidyut/prefix-search-optimized-radix"
 	"github.com/tidwall/gjson"
-	"treds/datastructures/radix"
 )
 
 const (
