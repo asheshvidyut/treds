@@ -6,7 +6,7 @@ toolchain go1.24.3
 
 require (
 	github.com/absolutelightning/gods v1.18.3
-	github.com/asheshvidyut/prefix-search-optimized-radix v1.0.2
+	github.com/asheshvidyut/prefix-search-optimized-radix v1.0.4
 	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/raft v1.7.1

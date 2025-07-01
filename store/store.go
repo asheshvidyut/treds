@@ -22,6 +22,7 @@ type Store interface {
 	ZRem([]string) error
 	ZCard(string) (int, error)
 	ZScore([]string) (string, error)
+	ZRange(string, int, int, bool) ([]string, error)
 	ZRangeByLexKVS(string, string, string, string, string, bool) ([]string, error)
 	ZRangeByLexKeys(string, string, string, string, string, bool) ([]string, error)
 	ZRangeByScoreKeys(string, string, string, string, string, bool) ([]string, error)

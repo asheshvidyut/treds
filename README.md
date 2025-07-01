@@ -120,6 +120,7 @@ This graph shows the performance comparison between Treds - ScanKeys and Etcd ge
 * `ZREM key member [member ...]` - Removes a member from sorted map in key
 * `ZCARD key` - Returns the count of key/value pairs in sorted map in key
 * `ZSCORE key member` - Returns the score of a member in sorted map in key
+* `ZRANGE key start_index end_index withscore` - Returns the key value pair, in sorted order from index start_index and end_index, end_index is exclusive
 * `ZRANGELEXKEYS key offset count withscore min max` - Returns the count number of keys are >= min and <= max starting from an index in a sorted map in lex order. WithScore can be true or false
 * `ZRANGELEXKVS key offset count withscore min max` - Returns the count number of key/value pair in which keys are >= min and <= max starting from an index in a sorted map in lex order. WithScore can be true or false
 * `ZRANGESCOREKEYS key min max offset count withscore` - Returns the count number of keys with the score between min/max in sorted order of score. WithScore can be true or false

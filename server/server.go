@@ -13,9 +13,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/asheshvidyut/prefix-search-optimized-radix"
 	wal "github.com/hashicorp/raft-wal"
 	"treds/commands"
-	"treds/datastructures/radix"
 	"treds/resp"
 	"treds/server/connPool"
 	"treds/store"

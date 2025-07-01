@@ -17,12 +17,12 @@ import (
 	"github.com/absolutelightning/gods/maps/treemap"
 	"github.com/absolutelightning/gods/sets/hashset"
 	"github.com/absolutelightning/gods/utils"
+	radix_tree "github.com/asheshvidyut/prefix-search-optimized-radix"
 	"github.com/golang/protobuf/proto"
 	"github.com/google/uuid"
 	"github.com/tidwall/gjson"
 	"golang.org/x/sync/errgroup"
 	"treds/datastructures/hnsw"
-	radix_tree "treds/datastructures/radix"
 	kvstore "treds/store/proto"
 )
 
@@ -890,6 +890,39 @@ func (ts *TredsStore) ZRem(args []string) error {
 		ts.sortedMapsKeys[args[0]], _, _ = ts.sortedMapsKeys[args[0]].Delete([]byte(arg))
 	}
 	return nil
+}
+
+func (ts *TredsStore) ZRange(key string, startIndex int, endIndex int, withScore bool) ([]string, error) {
+	kd := ts.getKeyDetails(key)
+	if kd != -1 && kd != SortedMapStore {
+		return nil, fmt.Errorf("not sorted map store")
+	}
+	radixTree, ok := ts.sortedMapsKeys[key]
+	if !ok {
+		return nil, nil
+	}
+	leafNode, found := radixTree.GetLeafAtIndex(startIndex)
+	if !found {
+		return nil, fmt.Errorf("invalid input")
+	}
+	result := make([]string, 0)
+	scoreMap := ts.sortedMapsScore[key]
+	diff := endIndex - startIndex
+	for diff > 0 {
+		if withScore {
+			keyScore := scoreMap[string(leafNode.Key())]
+			scoreStr := strconv.FormatFloat(keyScore, 'f', -1, 64) // Convert float to string with full precision
+			result = append(result, scoreStr)
+			result = append(result, string(leafNode.Key()))
+			result = append(result, leafNode.Value().(string))
+		} else {
+			result = append(result, string(leafNode.Key()))
+			result = append(result, leafNode.Value().(string))
+		}
+		diff--
+		leafNode = leafNode.GetNextLeaf()
+	}
+	return result, nil
 }
 
 func (ts *TredsStore) ZRangeByLexKVS(key, cursor, min, max, count string, withScore bool) ([]string, error) {

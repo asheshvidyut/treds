@@ -206,6 +206,10 @@ func (m *MockStore) ZRem([]string) error {
 	return nil
 }
 
+func (m *MockStore) ZRange(string, int, int, bool) ([]string, error) {
+	return nil, nil
+}
+
 func (m *MockStore) ZRangeByLexKVS(string, string, string, string, string, bool) ([]string, error) {
 	return nil, nil
 }

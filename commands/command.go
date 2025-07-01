@@ -14,6 +14,7 @@ func RegisterCommands(r CommandRegistry) {
 	RegisterMGetCommand(r)
 	RegisterDBSizeCommand(r)
 	RegisterZAddCommand(r)
+	RegisterZRangeCommand(r)
 	RegisterZRangeLexCommand(r)
 	RegisterZRangeLexKeysCommand(r)
 	RegisterZRangeScoreCommand(r)
