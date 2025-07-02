@@ -908,7 +908,7 @@ func (ts *TredsStore) ZRange(key string, startIndex int, endIndex int, withScore
 	result := make([]string, 0)
 	scoreMap := ts.sortedMapsScore[key]
 	diff := endIndex - startIndex
-	for diff > 0 {
+	for diff > 0 && leafNode != nil {
 		if withScore {
 			keyScore := scoreMap[string(leafNode.Key())]
 			scoreStr := strconv.FormatFloat(keyScore, 'f', -1, 64) // Convert float to string with full precision
