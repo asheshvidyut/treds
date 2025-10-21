@@ -52,9 +52,10 @@ type edge struct {
 type Node struct {
 
 	// leaf is used to store possible leaf
-	leaf    *LeafNode
-	minLeaf *LeafNode
-	maxLeaf *LeafNode
+	leaf            *LeafNode
+	minLeaf         *LeafNode
+	maxLeaf         *LeafNode
+	leavesInSubtree int
 
 	// prefix is the common prefix we ignore
 	prefix []byte
@@ -70,6 +71,7 @@ func (n *Node) isLeaf() bool {
 }
 
 func (n *Node) updateMinMaxLeaves() {
+	n.leavesInSubtree = 0
 	n.minLeaf = nil
 	n.maxLeaf = nil
 	if n.leaf != nil {
@@ -87,6 +89,10 @@ func (n *Node) updateMinMaxLeaves() {
 
 func (n *Node) computeLinks() {
 	n.updateMinMaxLeaves()
+	n.leavesInSubtree = 0
+	if n.isLeaf() {
+		n.leavesInSubtree++
+	}
 	if len(n.edges) > 0 {
 		if n.minLeaf != n.edges[0].node.minLeaf {
 			n.minLeaf.SetNextLeaf(n.edges[0].node.minLeaf)
@@ -96,6 +102,7 @@ func (n *Node) computeLinks() {
 		}
 	}
 	for itr := 0; itr < len(n.edges); itr++ {
+		n.leavesInSubtree += n.edges[itr].node.leavesInSubtree
 		maxLFirst, _ := n.edges[itr].node.MaximumLeaf()
 		var minLSecond *LeafNode
 		if itr+1 < len(n.edges) {
@@ -148,6 +155,17 @@ func (n *Node) replaceEdge(e edge) {
 		return
 	}
 	panic("replacing missing edge")
+}
+
+func (n *Node) getNextIndexEdge(idx int) (int, *Node) {
+	cumulativeIndex := 0
+	for iterIndex, edg := range n.edges {
+		cumulativeIndex += edg.node.leavesInSubtree
+		if cumulativeIndex > idx {
+			return iterIndex, edg.node
+		}
+	}
+	return -1, nil
 }
 
 func (n *Node) getEdge(label byte) (int, *Node) {
@@ -219,6 +237,55 @@ func (n *Node) Get(k []byte) (interface{}, bool) {
 	return val, ok
 }
 
+func (n *Node) GetAtIndex(index int) ([]byte, interface{}, bool) {
+	key, val, ok := n.SearchIndex(index)
+	return key, val, ok
+}
+
+func (n *Node) GetLeafAtIndex(index int) (*LeafNode, bool) {
+	return n.SearchLeafAtIndex(index)
+}
+
+func (n *Node) SearchLeafAtIndex(idx int) (*LeafNode, bool) {
+	if n == nil {
+		return nil, false
+	}
+	if idx == 0 && n.isLeaf() {
+		return n.leaf, true
+	}
+	if n.isLeaf() {
+		idx--
+	}
+	if n.leavesInSubtree > idx {
+		nextNodeIdx, nextNode := n.getNextIndexEdge(idx)
+		for itr := 0; itr < nextNodeIdx; itr++ {
+			idx -= n.edges[itr].node.leavesInSubtree
+		}
+		return nextNode.SearchLeafAtIndex(idx)
+	}
+	return nil, false
+}
+
+func (n *Node) SearchIndex(idx int) ([]byte, interface{}, bool) {
+	if n == nil {
+		return nil, nil, false
+	}
+	if idx == 0 && n.isLeaf() {
+		return n.leaf.key, n.leaf.val, true
+	}
+	if n.isLeaf() {
+		idx--
+	}
+	if n.leavesInSubtree > idx {
+		nextNodeIdx, nextNode := n.getNextIndexEdge(idx)
+		for itr := 0; itr < nextNodeIdx; itr++ {
+			idx -= n.edges[itr].node.leavesInSubtree
+		}
+		return nextNode.SearchIndex(idx)
+	}
+	return nil, nil, false
+}
+
 // LongestPrefix is like Get, but instead of an
 // exact match, it will return the longest prefix match.
 func (n *Node) LongestPrefix(k []byte) ([]byte, interface{}, bool) {
@@ -288,7 +355,7 @@ func (n *Node) Maximum() ([]byte, interface{}, bool) {
 // Iterator is used to return an iterator at
 // the given node to walk the tree
 func (n *Node) Iterator() *Iterator {
-	return &Iterator{node: n}
+	return &Iterator{node: n, iterLeafNode: n.minLeaf, iterCounter: n.leavesInSubtree}
 }
 
 // ReverseIterator is used to return an iterator at

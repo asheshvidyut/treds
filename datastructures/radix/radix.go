@@ -126,10 +126,11 @@ func (t *Txn) insert(n *Node, k, search []byte, v interface{}) (*Node, interface
 		e := edge{
 			label: search[0],
 			node: &Node{
-				leaf:    leaf,
-				minLeaf: leaf,
-				maxLeaf: leaf,
-				prefix:  search,
+				leaf:            leaf,
+				minLeaf:         leaf,
+				maxLeaf:         leaf,
+				prefix:          search,
+				leavesInSubtree: 1,
 			},
 		}
 		n.addEdge(e)
@@ -187,10 +188,11 @@ func (t *Txn) insert(n *Node, k, search []byte, v interface{}) (*Node, interface
 	splitNode.addEdge(edge{
 		label: search[0],
 		node: &Node{
-			leaf:    leaf,
-			minLeaf: leaf,
-			maxLeaf: leaf,
-			prefix:  search,
+			leaf:            leaf,
+			minLeaf:         leaf,
+			maxLeaf:         leaf,
+			prefix:          search,
+			leavesInSubtree: 1,
 		},
 	})
 	splitNode.computeLinks()
@@ -346,6 +348,16 @@ func (t *Txn) Root() *Node {
 // the value and if it was found
 func (t *Txn) Get(k []byte) (interface{}, bool) {
 	return t.root.Get(k)
+}
+
+// GetAtIndex is used to lookup a specific key, returning
+// the value and if it was found
+func (t *Tree) GetAtIndex(index int) ([]byte, interface{}, bool) {
+	return t.root.GetAtIndex(index)
+}
+
+func (t *Tree) GetLeafAtIndex(index int) (*LeafNode, bool) {
+	return t.root.GetLeafAtIndex(index)
 }
 
 // Commit is used to finalize the transaction and return a new tree. If mutation

@@ -10,16 +10,17 @@ import (
 type Iterator struct {
 	node           *Node
 	stack          []edges
-	leafNode       *LeafNode
+	iterLeafNode   *LeafNode
+	iterCounter    int
 	key            []byte
 	seekLowerBound bool
-	patternMatch   bool
 	pattern        *regexp.Regexp
+	regexMatch     bool
 }
 
-func (i *Iterator) PatternMatch(regex *regexp.Regexp) {
-	i.patternMatch = true
-	i.pattern = regex
+func (i *Iterator) PatternMatch(rx *regexp.Regexp) {
+	i.regexMatch = true
+	i.pattern = rx
 }
 
 // SeekPrefixWatch is used to seek the iterator to a given prefix
@@ -31,10 +32,14 @@ func (i *Iterator) SeekPrefixWatch(prefix []byte) (watch <-chan struct{}) {
 	i.key = prefix
 	n := i.node
 	search := prefix
+	i.iterLeafNode = i.node.minLeaf
+	i.iterCounter = i.node.leavesInSubtree
 	for {
 		// Check for key exhaustion
 		if len(search) == 0 {
 			i.node = n
+			i.iterLeafNode = i.node.minLeaf
+			i.iterCounter = i.node.leavesInSubtree
 			return
 		}
 
@@ -42,6 +47,8 @@ func (i *Iterator) SeekPrefixWatch(prefix []byte) (watch <-chan struct{}) {
 		_, n = n.getEdge(search[0])
 		if n == nil {
 			i.node = nil
+			i.iterLeafNode = nil
+			i.iterCounter = 0
 			return
 		}
 
@@ -51,9 +58,13 @@ func (i *Iterator) SeekPrefixWatch(prefix []byte) (watch <-chan struct{}) {
 
 		} else if bytes.HasPrefix(n.prefix, search) {
 			i.node = n
+			i.iterLeafNode = i.node.minLeaf
+			i.iterCounter = i.node.leavesInSubtree
 			return
 		} else {
 			i.node = nil
+			i.iterLeafNode = nil
+			i.iterCounter = 0
 			return
 		}
 	}
@@ -69,49 +80,33 @@ func (i *Iterator) Next() ([]byte, interface{}, bool) {
 
 	var zero interface{}
 
-	if i.node != nil && i.leafNode == nil {
-		i.leafNode, _ = i.node.MinimumLeaf()
-	}
-
-	if i.patternMatch {
-
-		for i.leafNode != nil {
-			matched := i.pattern.MatchString(string(i.leafNode.key))
-			if i.leafNode != nil && matched {
-				res := i.leafNode
-				i.leafNode = i.leafNode.GetNextLeaf()
-				if i.leafNode == nil {
-					i.node = nil
-				}
+	if i.regexMatch {
+		for i.iterLeafNode != nil {
+			matched := i.pattern.MatchString(string(i.iterLeafNode.key))
+			if i.iterLeafNode != nil && matched {
+				res := i.iterLeafNode
+				i.iterLeafNode = i.iterLeafNode.GetNextLeaf()
 				return res.key, res.val, true
 			} else {
-				i.leafNode = i.leafNode.GetNextLeaf()
-				if i.leafNode == nil {
-					i.node = nil
-				}
+				i.iterLeafNode = i.iterLeafNode.GetNextLeaf()
 			}
 		}
-
 	} else {
+		var zero interface{}
 
-		for i.leafNode != nil {
-			if bytes.HasPrefix(i.leafNode.key, i.key) {
-				res := i.leafNode
-				i.leafNode = i.leafNode.GetNextLeaf()
-				if i.leafNode == nil {
-					i.node = nil
-				}
-				return res.key, res.val, true
-			} else {
-				i.leafNode = nil
-				i.node = nil
-				break
-			}
+		i.iterCounter--
+
+		if i.iterCounter < 0 {
+			return nil, zero, false
 		}
+
+		key := i.iterLeafNode.key
+		val := i.iterLeafNode.val
+		i.iterLeafNode = i.iterLeafNode.nextLeaf
+		return key, val, true
 	}
 
-	i.leafNode = nil
+	i.iterLeafNode = nil
 	i.node = nil
-
 	return nil, zero, false
 }

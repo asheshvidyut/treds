@@ -17,12 +17,12 @@ import (
 	"github.com/absolutelightning/gods/maps/treemap"
 	"github.com/absolutelightning/gods/sets/hashset"
 	"github.com/absolutelightning/gods/utils"
-	radix_tree "github.com/asheshvidyut/prefix-search-optimized-radix"
 	"github.com/golang/protobuf/proto"
 	"github.com/google/uuid"
 	"github.com/tidwall/gjson"
 	"golang.org/x/sync/errgroup"
 	"treds/datastructures/hnsw"
+	radix_tree "treds/datastructures/radix"
 	kvstore "treds/store/proto"
 )
 
