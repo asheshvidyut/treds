@@ -12,8 +12,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"treds/datastructures/radix"
 
-	"github.com/asheshvidyut/prefix-search-optimized-radix"
 	wal "github.com/hashicorp/raft-wal"
 	"treds/commands"
 	"treds/resp"
