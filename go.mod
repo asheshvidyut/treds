@@ -5,6 +5,7 @@ go 1.24
 toolchain go1.24.3
 
 require (
+	github.com/absolutelightning/bloom v1.0.0
 	github.com/absolutelightning/gods v1.18.3
 	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.6.0
@@ -19,6 +20,7 @@ require (
 )
 
 require (
+	github.com/absolutelightning/bitset v1.0.0 // indirect
 	github.com/armon/go-metrics v0.4.1 // indirect
 	github.com/benbjohnson/immutable v0.4.0 // indirect
 	github.com/coreos/etcd v3.3.27+incompatible // indirect

@@ -68,4 +68,5 @@ func RegisterCommands(r CommandRegistry) {
 	RegisterVInsert(r)
 	RegisterVSearch(r)
 	RegisterVDelete(r)
+	RegisterBFAddCommand(r)
 }
